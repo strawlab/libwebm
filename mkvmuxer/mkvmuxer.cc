@@ -2897,12 +2897,14 @@ SegmentInfo::SegmentInfo()
       muxing_app_(NULL),
       timecode_scale_(1000000ULL),
       writing_app_(NULL),
+      title_(NULL),
       date_utc_(LLONG_MIN),
       duration_pos_(-1) {}
 
 SegmentInfo::~SegmentInfo() {
   delete[] muxing_app_;
   delete[] writing_app_;
+  delete[] title_;
 }
 
 bool SegmentInfo::Init() {
@@ -2979,6 +2981,9 @@ bool SegmentInfo::Write(IMkvWriter* writer) {
     size += EbmlDateElementSize(libwebm::kMkvDateUTC);
   size += EbmlElementSize(libwebm::kMkvMuxingApp, muxing_app_);
   size += EbmlElementSize(libwebm::kMkvWritingApp, writing_app_);
+  if (title_) {
+    size += EbmlElementSize(libwebm::kMkvTitle, title_);
+  }
 
   if (!WriteEbmlMasterElement(writer, libwebm::kMkvInfo, size))
     return false;
@@ -3007,6 +3012,11 @@ bool SegmentInfo::Write(IMkvWriter* writer) {
     return false;
   if (!WriteEbmlElement(writer, libwebm::kMkvWritingApp, writing_app_))
     return false;
+
+  if (title_) {
+    if (!WriteEbmlElement(writer, libwebm::kMkvTitle, title_))
+        return false;
+  }
 
   const int64_t stop_position = writer->Position();
   if (stop_position < 0 ||
@@ -3049,6 +3059,24 @@ void SegmentInfo::set_writing_app(const char* app) {
 
     delete[] writing_app_;
     writing_app_ = temp_str;
+  }
+}
+
+void SegmentInfo::set_title(const char* title) {
+  if (title) {
+    const size_t length = strlen(title) + 1;
+    char* temp_str = new (std::nothrow) char[length];  // NOLINT
+    if (!temp_str)
+      return;
+
+#ifdef _MSC_VER
+    strcpy_s(temp_str, length, title);
+#else
+    strcpy(temp_str, title);
+#endif
+
+    delete[] title_;
+    title_ = temp_str;
   }
 }
 

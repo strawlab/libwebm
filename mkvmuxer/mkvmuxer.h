@@ -1468,6 +1468,8 @@ class SegmentInfo {
   uint64_t timecode_scale() const { return timecode_scale_; }
   void set_writing_app(const char* app);
   const char* writing_app() const { return writing_app_; }
+  void set_title(const char* title);
+  const char* title() const { return title_; }
   void set_date_utc(int64_t date_utc) { date_utc_ = date_utc; }
   int64_t date_utc() const { return date_utc_; }
 
@@ -1481,6 +1483,8 @@ class SegmentInfo {
   uint64_t timecode_scale_;
   // Initially set to libwebm-%d.%d.%d.%d, major, minor, build, revision.
   char* writing_app_;
+  // The title of the segment
+  char* title_;
   // LLONG_MIN when DateUTC is not set.
   int64_t date_utc_;
 
