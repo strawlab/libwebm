@@ -1421,6 +1421,7 @@ VideoTrack::VideoTrack(unsigned int* seed)
       crop_right_(0),
       crop_top_(0),
       crop_bottom_(0),
+      gamma_value_(0.0),
       frame_rate_(0.0),
       height_(0),
       stereo_mode_(0),
@@ -1527,6 +1528,12 @@ bool VideoTrack::Write(IMkvWriter* writer) const {
   if (colour_space_) {
     if (!WriteEbmlElement(writer, libwebm::kMkvColourSpace, colour_space_))
       return false;
+  }
+  if (gamma_value_ > 0.0) {
+    if (!WriteEbmlElement(writer, libwebm::kMkvGammaValue,
+                          static_cast<float>(gamma_value_))) {
+      return false;
+    }
   }
   if (frame_rate_ > 0.0) {
     if (!WriteEbmlElement(writer, libwebm::kMkvFrameRate,
@@ -1648,6 +1655,9 @@ uint64_t VideoTrack::VideoPayloadSize() const {
   if (alpha_mode_ > kNoAlpha)
     size += EbmlElementSize(libwebm::kMkvAlphaMode,
                             static_cast<uint64>(alpha_mode_));
+  if (gamma_value_ > 0.0)
+    size += EbmlElementSize(libwebm::kMkvGammaValue,
+                            static_cast<float>(gamma_value_));
   if (frame_rate_ > 0.0)
     size += EbmlElementSize(libwebm::kMkvFrameRate,
                             static_cast<float>(frame_rate_));
